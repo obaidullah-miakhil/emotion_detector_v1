@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emotion Detector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #live-camera {
+            max-width: 100%;
+            display: none;
+            margin-top: 10px;
+        }
+        .btn {
+            padding: 10px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .btn.stop {
+            background: #f44336;
+        }
+        #prediction-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Emotion Detection</h1>
+    
+    <div class="section">
+        <h2>Real-time Webcam Detection</h2>
+        <button id="start-cam" class="btn">Start Camera</button>
+        <button id="stop-cam" class="btn stop">Stop Camera</button>
+        <div id="camera-container">
+            <img id="live-camera" src="{{ url_for('video_feed') }}">
+            <div id="prediction-result"></div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Image Upload</h2>
+        <form method="POST" action="/predict" enctype="multipart/form-data">
+            <input type="file" name="image" required>
+            <button type="submit" class="btn">Predict Emotion</button>
+        </form>
+
+        {% if prediction %}
+            <div id="upload-result">
+                <h3>Prediction: {{ prediction }}</h3>
+                <img src="{{ url_for('static', filename='uploads/' + image) }}" width="300">
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('start-cam');
+        const stopBtn = document.getElementById('stop-cam');
+        const liveCamera = document.getElementById('live-camera');
+        const predictionResult = document.getElementById('prediction-result');
+        
+        startBtn.addEventListener('click', () => {
+            liveCamera.style.display = 'block';
+            predictionResult.textContent = "Loading real-time detection...";
+        });
+        
+        stopBtn.addEventListener('click', () => {
+            liveCamera.style.display = 'none';
+            predictionResult.textContent = "";
+            fetch('/stop_camera')
+                .then(response => console.log('Camera stopped'))
+                .catch(err => console.error('Error stopping camera:', err));
+        });
+    </script>
+</body>
+</html>
